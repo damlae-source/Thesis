@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 import json
 from datetime import datetime
-
+ 
 # ── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Tez Araştırma Asistanı",
@@ -10,12 +10,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
+ 
 # ── DARK & SLEEK CSS ──────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
+ 
 :root {
     --bg-primary:    #0d1117;
     --bg-secondary:  #111827;
@@ -31,28 +31,28 @@ st.markdown("""
     --border-glow:   #3b82f633;
     --radius:        12px;
 }
-
+ 
 /* ── Global reset ── */
 html, body, [class*="css"] {
     font-family: 'DM Sans', sans-serif;
     background-color: var(--bg-primary) !important;
     color: var(--text-primary) !important;
 }
-
+ 
 /* ── Main container ── */
 .main .block-container {
     background-color: var(--bg-primary);
     padding: 2rem 2.5rem 4rem;
     max-width: 1100px;
 }
-
+ 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
     background: var(--bg-secondary) !important;
     border-right: 1px solid var(--border) !important;
 }
 [data-testid="stSidebar"] * { color: var(--text-primary) !important; }
-
+ 
 /* ── Header strip ── */
 .app-header {
     background: linear-gradient(135deg, #0f1a2e 0%, #0d1117 50%, #0a1628 100%);
@@ -86,7 +86,7 @@ html, body, [class*="css"] {
     margin: 0;
     letter-spacing: .3px;
 }
-
+ 
 /* ── Module badge ── */
 .module-badge {
     display: inline-flex;
@@ -103,7 +103,7 @@ html, body, [class*="css"] {
     color: var(--accent-teal);
     margin-bottom: 1.2rem;
 }
-
+ 
 /* ── Chat messages ── */
 .chat-wrapper {
     display: flex;
@@ -113,7 +113,7 @@ html, body, [class*="css"] {
 }
 .msg-row { display: flex; gap: .8rem; align-items: flex-start; }
 .msg-row.user  { flex-direction: row-reverse; }
-
+ 
 .avatar {
     width: 36px; height: 36px;
     border-radius: 10px;
@@ -123,7 +123,7 @@ html, body, [class*="css"] {
 }
 .avatar.ai   { background: linear-gradient(135deg,#1e3a5f,#0f2744); border: 1px solid #2563eb55; }
 .avatar.user { background: linear-gradient(135deg,#1a3a2e,#0f2720); border: 1px solid #14b8a655; }
-
+ 
 .bubble {
     max-width: 82%;
     border-radius: var(--radius);
@@ -162,7 +162,7 @@ html, body, [class*="css"] {
     margin: .5rem 0;
 }
 .bubble pre code { background: none; border: none; padding: 0; }
-
+ 
 .msg-time {
     font-size: .7rem;
     color: var(--text-muted);
@@ -170,7 +170,7 @@ html, body, [class*="css"] {
     text-align: right;
 }
 .msg-row.user .msg-time { text-align: left; }
-
+ 
 /* ── Typing indicator ── */
 .typing-dots { display: flex; gap: 5px; align-items: center; padding: .2rem 0; }
 .typing-dots span {
@@ -182,7 +182,7 @@ html, body, [class*="css"] {
 .typing-dots span:nth-child(2) { animation-delay: .2s; }
 .typing-dots span:nth-child(3) { animation-delay: .4s; }
 @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
-
+ 
 /* ── Input area ── */
 [data-testid="stTextInput"] input,
 [data-testid="stTextArea"] textarea {
@@ -199,7 +199,7 @@ html, body, [class*="css"] {
     border-color: var(--accent-blue) !important;
     box-shadow: 0 0 0 3px var(--border-glow) !important;
 }
-
+ 
 /* ── Buttons ── */
 [data-testid="baseButton-primary"],
 .stButton > button {
@@ -216,7 +216,7 @@ html, body, [class*="css"] {
     transform: translateY(-1px) !important;
     box-shadow: 0 4px 16px #3b82f633 !important;
 }
-
+ 
 /* ── Radio / selectbox ── */
 [data-testid="stRadio"] label,
 [data-testid="stSelectbox"] * {
@@ -224,14 +224,14 @@ html, body, [class*="css"] {
     font-size: .9rem !important;
 }
 [data-testid="stRadio"] [aria-checked="true"] + div { color: var(--accent-teal) !important; }
-
+ 
 /* ── Expander ── */
 details summary {
     color: var(--text-dim) !important;
     font-size: .85rem !important;
 }
 details[open] > summary { color: var(--accent-teal) !important; }
-
+ 
 /* ── Metric cards (sidebar) ── */
 .metric-card {
     background: var(--bg-card);
@@ -245,16 +245,16 @@ details[open] > summary { color: var(--accent-teal) !important; }
 }
 .metric-label { font-size: .78rem; color: var(--text-muted); }
 .metric-value { font-family: 'Space Mono', monospace; font-size: .88rem; color: var(--accent-blue); font-weight: 700; }
-
+ 
 /* ── Divider ── */
 hr { border-color: var(--border) !important; margin: 1.2rem 0 !important; }
-
+ 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
-
+ 
 /* ── Formula / quick-tool cards ── */
 .tool-card {
     background: var(--bg-card);
@@ -274,17 +274,23 @@ hr { border-color: var(--border) !important; margin: 1.2rem 0 !important; }
 }
 </style>
 """, unsafe_allow_html=True)
-
+ 
 # ── SESSION STATE INIT ────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []      # {"role","content","time"}
 if "module" not in st.session_state:
     st.session_state.module = "Araştırma"
-if "api_key" not in st.session_state:
-    st.session_state.api_key = ""
 if "mol_result" not in st.session_state:
     st.session_state.mol_result = None
-
+ 
+# ── API KEY: Secrets > Manuel Giriş ──────────────────────────────────────────
+# Önce Streamlit Secrets'tan oku, yoksa session_state'te sakla
+if "api_key" not in st.session_state:
+    try:
+        st.session_state.api_key = st.secrets["OPENROUTER_API_KEY"]
+    except Exception:
+        st.session_state.api_key = ""
+ 
 # ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
 BASE_SYSTEM = (
     "Sen bir eczacılık fakültesi öğrencisi için uzman bir tez danışmanısın. "
@@ -296,7 +302,7 @@ BASE_SYSTEM = (
     "Kesinlikle resmi, bilimsel, imla kurallarına uygun Türkçe kullan. "
     "Yanıtlarını yapılandırılmış, detaylı ve kaynaklara atıfla desteklenmiş biçimde ver."
 )
-
+ 
 MODULE_PROMPTS = {
     "Araştırma": (
         BASE_SYSTEM
@@ -322,14 +328,14 @@ MODULE_PROMPTS = {
         "Kullanıcının verdiği metni düzelt ve iyileştir."
     ),
 }
-
+ 
 # ── OPENROUTER CLIENT ─────────────────────────────────────────────────────────
 def get_client(api_key: str) -> OpenAI:
     return OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-
+ 
 def chat_with_model(api_key: str, module: str, history: list) -> str:
     client = get_client(api_key)
     messages = [{"role": "system", "content": MODULE_PROMPTS[module]}]
@@ -337,24 +343,28 @@ def chat_with_model(api_key: str, module: str, history: list) -> str:
         messages.append({"role": m["role"], "content": m["content"]})
     try:
         response = client.chat.completions.create(
-            model="google/gemini-pro-1.5",
+            model="openrouter/auto",
             messages=messages,
             max_tokens=2048,
             temperature=0.7,
+            extra_headers={
+                "HTTP-Referer": "https://thesisai.app",
+                "X-Title": "ThesisAI"
+            }
         )
         return response.choices[0].message.content
     except Exception as e:
         return f"⚠️ API Hatası: {str(e)}"
-
+ 
 # ── MOLARITE HESAPLAMA ────────────────────────────────────────────────────────
 def calculate_molarity(mass_g: float, mol_weight: float, volume_ml: float) -> dict:
     moles = mass_g / mol_weight
     molarity = moles / (volume_ml / 1000)
     return {"mol": round(moles, 6), "M": round(molarity, 6)}
-
+ 
 def calculate_dilution(c1: float, v2: float, c2: float) -> float:
     return round((c2 * v2) / c1, 4)
-
+ 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
@@ -370,20 +380,32 @@ with st.sidebar:
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("**API Yapılandırması**")
-    api_key_input = st.text_input(
-        "OpenRouter API Anahtarı",
-        value=st.session_state.api_key,
-        type="password",
-        placeholder="sk-or-...",
-        label_visibility="collapsed",
-    )
-    if api_key_input:
-        st.session_state.api_key = api_key_input
-
+ 
+    # API Key: Secrets kontrolü
+    _secret_loaded = bool(st.session_state.api_key)
+    if _secret_loaded:
+        st.markdown("""
+        <div style='background:#0f2720;border:1px solid #14b8a630;border-radius:8px;
+             padding:.55rem .9rem;margin-bottom:.8rem;font-size:.75rem;color:#14b8a6;
+             font-family:Space Mono,monospace;'>
+            ✓ API Anahtarı otomatik yüklendi
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("**API Anahtarı**")
+        _manual_key = st.text_input(
+            "OpenRouter API Anahtarı",
+            value="",
+            type="password",
+            placeholder="sk-or-...",
+            label_visibility="collapsed",
+        )
+        if _manual_key:
+            st.session_state.api_key = _manual_key
+        st.caption("💡 Kalıcı için: Streamlit Cloud → Settings → Secrets")
+ 
     st.divider()
-
+ 
     st.markdown("**Modül Seçimi**")
     module_icons = {"Araştırma": "🔬", "Deney": "⚗️", "Yazım": "📝"}
     selected = st.radio(
@@ -395,9 +417,9 @@ with st.sidebar:
     )
     if selected != st.session_state.module:
         st.session_state.module = selected
-
+ 
     st.divider()
-
+ 
     # Stats
     total_msgs = len(st.session_state.messages)
     user_msgs  = sum(1 for m in st.session_state.messages if m["role"] == "user")
@@ -416,14 +438,14 @@ with st.sidebar:
         <span class='metric-value'>{selected[:6].upper()}</span>
     </div>
     """, unsafe_allow_html=True)
-
+ 
     st.divider()
-
+ 
     if st.button("🗑️  Geçmişi Temizle", use_container_width=True):
         st.session_state.messages = []
         st.session_state.mol_result = None
         st.rerun()
-
+ 
     # Quick tips per module
     tips = {
         "Araştırma": ["PubMed MESH Terimler", "Sistematik Derleme", "IF Sorgulama"],
@@ -439,7 +461,7 @@ with st.sidebar:
                 "time": datetime.now().strftime("%H:%M"),
             })
             st.rerun()
-
+ 
 # ── MAIN CONTENT ──────────────────────────────────────────────────────────────
 mod = st.session_state.module
 mod_colors = {"Araştırma": "#3b82f6", "Deney": "#14b8a6", "Yazım": "#6366f1"}
@@ -448,7 +470,7 @@ mod_descs = {
     "Deney":     "Molarite hesaplama · Protokol tasarımı · Veri analizi",
     "Yazım":     "Paragraf düzenleme · Kaynakça formatlama · IMRaD yapısı",
 }
-
+ 
 st.markdown(f"""
 <div class='app-header'>
     <div class='app-header-title'>🧬 Tez Araştırma & Laboratuvar Asistanı</div>
@@ -459,12 +481,12 @@ st.markdown(f"""
     {module_icons[mod]} {mod} Modülü — {mod_descs[mod]}
 </div>
 """, unsafe_allow_html=True)
-
+ 
 # ── DENEY MODÜLÜ: Hızlı Hesaplama Araçları ───────────────────────────────────
 if mod == "Deney":
     with st.expander("⚗️  Molarite & Dilüsyon Hızlı Hesaplama Araçları", expanded=False):
         col1, col2 = st.columns(2)
-
+ 
         with col1:
             st.markdown("<div class='tool-card'><div class='tool-card-title'>Molarite Hesaplama</div>", unsafe_allow_html=True)
             mass   = st.number_input("Kütle (g)", min_value=0.0, value=0.0, step=0.001, format="%.4f", key="mass")
@@ -477,7 +499,7 @@ if mod == "Deney":
                 else:
                     st.warning("Lütfen tüm alanları doldurun.")
             st.markdown("</div>", unsafe_allow_html=True)
-
+ 
         with col2:
             st.markdown("<div class='tool-card'><div class='tool-card-title'>Seyreltme (C₁V₁ = C₂V₂)</div>", unsafe_allow_html=True)
             c1 = st.number_input("Stok Konsantrasyon C₁ (mM)", min_value=0.0, value=10.0, step=0.1, key="c1")
@@ -491,7 +513,7 @@ if mod == "Deney":
                 else:
                     st.warning("Lütfen tüm alanları doldurun.")
             st.markdown("</div>", unsafe_allow_html=True)
-
+ 
 # ── YAZIM MODÜLÜ: Metin Düzenleme Alanı ──────────────────────────────────────
 quick_text = None
 if mod == "Yazım":
@@ -508,10 +530,10 @@ if mod == "Yazım":
                     f"Aşağıdaki metni {ref_style} formatına uygun, IMRaD yapısına göre "
                     f"akademik dil kuralları çerçevesinde düzenle ve iyileştir:\n\n{raw_text}"
                 )
-
+ 
 # ── CHAT HISTORY ──────────────────────────────────────────────────────────────
 st.markdown("<div class='chat-wrapper'>", unsafe_allow_html=True)
-
+ 
 if not st.session_state.messages:
     welcome_texts = {
         "Araştırma": (
@@ -537,7 +559,7 @@ if not st.session_state.messages:
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+ 
 for msg in st.session_state.messages:
     role_class = "user" if msg["role"] == "user" else "ai"
     avatar = "👤" if msg["role"] == "user" else "🧬"
@@ -552,22 +574,22 @@ for msg in st.session_state.messages:
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+ 
 st.markdown("</div>", unsafe_allow_html=True)
-
-# ── INPUT AREA ────────────────────────────────────────────────────────────────
+ 
+# ── INPUT AREA (form → Enter ile gönderim) ────────────────────────────────────
 st.markdown("<br>", unsafe_allow_html=True)
-col_input, col_btn = st.columns([5, 1])
-with col_input:
-    user_input = st.text_input(
-        "Mesajınız",
-        placeholder=f"{module_icons[mod]} {mod} modülünde sorunuzu yazın...",
-        label_visibility="collapsed",
-        key="user_input",
-    )
-with col_btn:
-    send_clicked = st.button("Gönder →", use_container_width=True, type="primary")
-
+with st.form(key="chat_form", clear_on_submit=True):
+    col_input, col_btn = st.columns([5, 1])
+    with col_input:
+        user_input = st.text_input(
+            "Mesajınız",
+            placeholder=f"{module_icons[mod]} {mod} modülünde sorunuzu yazın...",
+            label_visibility="collapsed",
+        )
+    with col_btn:
+        send_clicked = st.form_submit_button("Gönder →", use_container_width=True, type="primary")
+ 
 # ── SEND LOGIC ────────────────────────────────────────────────────────────────
 def send_message(content: str):
     if not st.session_state.api_key:
@@ -575,27 +597,24 @@ def send_message(content: str):
         return
     ts = datetime.now().strftime("%H:%M")
     st.session_state.messages.append({"role": "user", "content": content, "time": ts})
-
-    # Call model
-    with st.spinner(""):
+    with st.spinner("Yanıt hazırlanıyor..."):
         reply = chat_with_model(
             st.session_state.api_key,
             st.session_state.module,
-            st.session_state.messages[:-1] + [{"role": "user", "content": content}],
+            st.session_state.messages,
         )
-
     st.session_state.messages.append({
         "role": "assistant",
         "content": reply,
         "time": datetime.now().strftime("%H:%M"),
     })
     st.rerun()
-
+ 
 if quick_text:
     send_message(quick_text)
 elif send_clicked and user_input.strip():
     send_message(user_input.strip())
-
+ 
 # ── FOOTER ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style='text-align:center;padding:2rem 0 1rem;
@@ -604,3 +623,4 @@ st.markdown("""
     <span style='color:#1e3a5f;'>Eczacılık Tez Destek Platformu</span>
 </div>
 """, unsafe_allow_html=True)
+ 
